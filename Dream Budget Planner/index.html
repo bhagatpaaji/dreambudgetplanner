@@ -1,0 +1,2145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="color-scheme" content="dark light">
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#0b0f14" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#f6f7f9" media="(prefers-color-scheme: light)">
+  <title>Dream Budget Planner — Free Budget Calculator & Expense Tracker</title>
+  <meta name="application-name" content="Dream Budget Planner" />
+  <meta name="apple-mobile-web-app-title" content="Dream Budget Planner" />
+  <meta name="description" content="Plan your monthly budget, track expenses, and reach savings goals with Dream Budget Planner. Free, offline‑capable PWA with charts, exports, and multi‑currency support." />
+  <meta name="keywords" content="budget planner, monthly budget planner, budget calculator, expense tracker, savings goals, savings planner, bill tracker, personal finance, budgeting app, cash flow, zero‑based budgeting, 50/30/20 rule, envelope budgeting, debt payoff, sinking funds, emergency fund, inflation, INR, USD, EUR, PWA" />
+  <meta name="robots" content="index,follow" />
+  <meta property="og:title" content="Dream Budget Planner — Free Budget Calculator & Expense Tracker" />
+  <meta property="og:description" content="Plan your monthly budget, track expenses, and reach savings goals with Dream Budget Planner. Free, offline‑capable PWA with charts, exports, and multi‑currency support." />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="icons/icon-maskable.svg" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Dream Budget Planner — Free Budget Calculator & Expense Tracker" />
+  <meta name="twitter:description" content="Plan your monthly budget, track expenses, and reach savings goals with Dream Budget Planner. Free, offline‑capable PWA with charts, exports, and multi‑currency support." />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Dream Budget Planner — Budget Calculator & Expense Tracker",
+    "alternateName": "ड्रीम बजट प्लानर — बजट कैलकुलेटर और खर्च ट्रैकर",
+    "applicationCategory": "FinanceApplication",
+    "operatingSystem": "Web",
+    "url": "https://example.com",
+    "inLanguage": ["en", "hi"],
+    "description": "Plan your monthly budget, track expenses, and reach savings goals with Dream Budget Planner. Free, offline-capable PWA with charts, exports, and multi-currency support.",
+    "isAccessibleForFree": true,
+    "image": "icons/icon-maskable.svg",
+    "softwareVersion": "1.0.0",
+    "publisher": { "@type": "Organization", "name": "Dream Budget Planner" },
+    "keywords": [
+      "budget planner",
+      "budget calculator",
+      "monthly budget planner",
+      "expense tracker",
+      "bill tracker",
+      "savings goals",
+      "savings planner",
+      "personal finance",
+      "budgeting app",
+      "cash flow",
+      "zero-based budgeting",
+      "50/30/20 rule",
+      "envelope budgeting",
+      "debt payoff",
+      "sinking funds",
+      "emergency fund",
+      "inflation",
+      "INR",
+      "USD",
+      "EUR",
+      "PWA",
+      "offline budget"
+    ],
+    "featureList": [
+      "Inflation-adjusted goal calculation",
+      "Multiple currencies (INR/USD/EUR)",
+      "Live chart",
+      "PDF and image export",
+      "Web Share integration",
+      "Saved dreams with local storage",
+      "Offline-first PWA",
+      "Light/Dark theme and Hindi support"
+    ]
+  }
+  </script>
+  <!--
+    Reality Check — Cost of Dreams Calculator
+    Single-file, production-ready, mobile-first HTML app.
+
+    HOW TO CUSTOMIZE / DEPLOY
+    - Exchange Rates:
+      This app uses a public, no-key endpoint by default (exchangerate.host).
+      To swap to your preferred provider (e.g., Open Exchange Rates or CurrencyAPI),
+      edit fetchExchangeRates() in the script (search: "fetchExchangeRates").
+      If your provider requires an API key, DO NOT hardcode it. Instead:
+        1) add a placeholder environment var in deployment,
+        2) read it at runtime from a secure endpoint, OR
+        3) rely on the built-in fallback rates if offline.
+      Rates are cached in localStorage for 12 hours. If offline, cached or fallback
+      hard-coded rates are used.
+
+    - Presets:
+      Edit the PRESETS array in the script (search: "PRESETS").
+      Values are in INR by default and converted upon currency change.
+
+    - Inflation:
+      Default annual inflation is 4% (see DEFAULTS.INFLATION_ANNUAL).
+      You can change the default via DEFAULTS or in the UI.
+
+    - Deploy as a single HTML:
+      - GitHub Pages: commit this file to your repo (e.g., /docs), then enable Pages.
+      - Netlify: drag-and-drop this file into Netlify or push to a repo connected to Netlify.
+      - Any static host: upload this single .html file.
+      All features work locally as a file:// too, except remote CDN fetches (libraries) and service worker caching.
+      Exports gracefully fallback if libs aren't available.
+
+    TODO (future server integration):
+      - User auth & secure cloud backups of saved dreams
+      - Team sharing with collaborative edits
+      - Server-side PDF rendering for pixel-perfect outputs
+      - Realtime FX rate proxy with server cache
+
+    Debugging:
+      Set DEBUG = true in the script to enable console logs.
+
+    Accessibility:
+      - Proper <label for> pairs
+      - aria-live results region
+      - Keyboard navigable controls
+      - Reduced motion respected
+
+    Notes on Offline:
+      - When opened as file://, browser service workers won't register. The app still runs
+        fully offline for calculations, saving, and exports. External libraries (html2canvas/jsPDF)
+        may not load offline; when unavailable, the app falls back to a built-in share card renderer
+        for image exports and suggests using Print to PDF for PDF reports.
+  -->
+  <!-- Optional libraries: loaded when online. App works without them using fallbacks. -->
+  <!-- Integrity hints omitted because they change per CDN; add SRI if you lock versions. -->
+  <script defer src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js" crossorigin="anonymous"></script>
+  <style>
+    :root {
+      --bg: #0b0f14;
+      --bg-soft: #10161d;
+      --card: #131a22;
+      --text: #e6edf3;
+      --muted: #a8b3be;
+      --primary: #49a5ff;
+      --primary-600: #3188da;
+      --accent: #7ee787;
+      --danger: #ff6b6b;
+      --warning: #ffb86b;
+      --border: #1f2a35;
+      --focus: #93c5fd;
+      --shadow: 0 10px 30px rgba(0,0,0,0.35);
+      --radius: 12px;
+      --radius-sm: 8px;
+      --tap: 44px;
+      --ring: 0 0 0 3px rgba(73,165,255,0.35);
+      --font: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Noto Sans, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+    }
+    [data-theme="light"] {
+      --bg: #f6f7f9;
+      --bg-soft: #ffffff;
+      --card: #ffffff;
+      --text: #0b0f14;
+      --muted: #475569;
+      --primary: #2563eb;
+      --primary-600: #1d4ed8;
+      --accent: #059669;
+      --danger: #dc2626;
+      --warning: #d97706;
+      --border: #e5e7eb;
+      --focus: #2563eb;
+      --shadow: 0 8px 24px rgba(2,6,23,0.08);
+    }
+    @media (prefers-color-scheme: light) {
+      :root:not([data-theme="dark"]) {
+        --bg: #f6f7f9;
+        --bg-soft: #ffffff;
+        --card: #ffffff;
+        --text: #0b0f14;
+        --muted: #475569;
+        --primary: #2563eb;
+        --primary-600: #1d4ed8;
+        --accent: #059669;
+        --danger: #dc2626;
+        --warning: #d97706;
+        --border: #e5e7eb;
+        --focus: #2563eb;
+        --shadow: 0 8px 24px rgba(2,6,23,0.08);
+      }
+    }
+
+    html, body {
+      height: 100%;
+    }
+    body {
+      margin: 0;
+      font-family: var(--font);
+      background: linear-gradient(180deg, var(--bg) 0%, var(--bg-soft) 100%);
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      line-height: 1.4;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 16px;
+    }
+    header.app-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .app-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+      margin: 0;
+    }
+    .badge {
+      background: linear-gradient(90deg, var(--primary), var(--accent));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      font-weight: 700;
+    }
+    .actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    button.icon-btn {
+      height: var(--tap);
+      min-width: var(--tap);
+      padding: 0 12px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--text);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      box-shadow: var(--shadow);
+    }
+    button.icon-btn:hover { border-color: var(--primary); }
+    button.icon-btn:focus-visible { outline: none; box-shadow: var(--ring); }
+    .layout {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+    @media (min-width: 900px) {
+      .layout {
+        grid-template-columns: 1fr 1fr;
+        align-items: start;
+      }
+    }
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 16px;
+    }
+    .panel h2 {
+      margin: 0 0 12px 0;
+      font-size: 1rem;
+    }
+
+    /* Presets */
+    .presets {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+    @media (min-width: 560px) {
+      .presets {
+        grid-template-columns: repeat(6, 1fr);
+      }
+    }
+    .tile {
+      border: 1px solid var(--border);
+      background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(0,0,0,0.05));
+      border-radius: 12px;
+      padding: 10px;
+      text-align: center;
+      cursor: pointer;
+      user-select: none;
+      transition: transform 150ms ease, border-color 150ms ease;
+    }
+    .tile:hover { border-color: var(--primary); }
+    .tile:active { transform: scale(0.98); }
+    .tile.selected {
+      outline: 2px solid var(--primary);
+      border-color: var(--primary);
+    }
+    .tile .icon {
+      font-size: 20px;
+      margin-bottom: 6px;
+    }
+    .tile .name {
+      font-size: 12px;
+    }
+    .tile .amount {
+      margin-top: 4px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .inline-edit {
+      margin-top: 6px;
+      display: none;
+    }
+    .tile.selected .inline-edit { display: block; }
+    .inline-edit input {
+      width: 100%;
+      padding: 6px 8px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--bg-soft);
+      color: var(--text);
+    }
+
+    /* Inputs */
+    .field {
+      margin-top: 12px;
+    }
+    .field label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .control {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .control input[type="text"],
+    .control input[type="number"],
+    .control input[type="date"],
+    .control select {
+      flex: 1;
+      min-height: 40px;
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      background: var(--bg-soft);
+      color: var(--text);
+    }
+    .control input[type="checkbox"] {
+      width: 18px; height: 18px;
+    }
+    .hint {
+      margin-top: 4px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .row {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+    @media (min-width: 560px) {
+      .row.two { grid-template-columns: 1fr 1fr; }
+      .row.three { grid-template-columns: 1fr 1fr 1fr; }
+    }
+    .slider-wrap {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 8px;
+    }
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--primary);
+    }
+
+    /* Buttons */
+    .btn-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 12px;
+    }
+    @media (min-width: 560px) {
+      .btn-row { grid-template-columns: repeat(4, 1fr); }
+    }
+    .btn {
+      height: var(--tap);
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      background: var(--primary);
+      color: white;
+      cursor: pointer;
+      font-weight: 600;
+      box-shadow: var(--shadow);
+    }
+    .btn.secondary { background: var(--bg-soft); color: var(--text); }
+    .btn.destructive { background: var(--danger); }
+    .btn:focus-visible { outline: none; box-shadow: var(--ring); }
+    .sub-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    /* Result Card */
+    .result-card {
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      padding: 16px;
+      background: linear-gradient(180deg, rgba(73,165,255,0.12), rgba(126,231,135,0.06));
+    }
+    .goal-head {
+      display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    }
+    .goal-title {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: 1.1rem; font-weight: 700;
+    }
+    .goal-amount {
+      font-weight: 700; color: var(--accent);
+    }
+    .kv {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; font-size: 13px;
+    }
+    .req {
+      margin-top: 12px;
+      font-size: 28px; font-weight: 800;
+    }
+    .scenario {
+      margin-top: 12px;
+      border-top: 1px dashed var(--border);
+      padding-top: 12px;
+      display: grid;
+      gap: 8px;
+    }
+    .scenario .block {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px;
+      background: rgba(0,0,0,0.05);
+    }
+    .scenario .label { font-weight: 700; font-size: 14px; }
+    .scenario .text { font-size: 13px; color: var(--muted); }
+    .tips {
+      margin-top: 8px;
+      display: grid; gap: 6px;
+    }
+    .tips .tip {
+      font-size: 13px; background: rgba(255,255,255,0.04);
+      border: 1px dashed var(--border); padding: 8px; border-radius: 8px;
+    }
+    .mini {
+      margin-top: 8px; font-size: 12px; color: var(--muted);
+    }
+
+    /* Chart */
+    .chart-card {
+      margin-top: 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      background: var(--bg-soft);
+    }
+    .chart-head {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 10px 12px; border-bottom: 1px solid var(--border); gap: 8px;
+    }
+    .legend {
+      display: flex; gap: 10px; flex-wrap: wrap;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .legend .dot { display: inline-block; width: 10px; height: 10px; border-radius: 999px; margin-right: 6px; }
+    .tooltip {
+      position: absolute; pointer-events: none; z-index: 10;
+      background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 6px 8px; font-size: 12px; color: var(--text); box-shadow: var(--shadow);
+      transform: translate(-50%, -100%); white-space: nowrap; display: none;
+    }
+    .chart-wrap {
+      position: relative;
+      width: 100%;
+      height: 240px;
+    }
+    canvas#chart {
+      width: 100%; height: 100%;
+      display: block;
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.06));
+    }
+
+    /* Saved Dreams */
+    .saved {
+      margin-top: 12px;
+      border-top: 1px dashed var(--border);
+      padding-top: 12px;
+    }
+    .saved-list {
+      display: grid; gap: 8px;
+      max-height: 200px; overflow: auto;
+    }
+    .saved-item {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 8px;
+      display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center;
+      background: rgba(255,255,255,0.04);
+    }
+    .saved-actions { display: flex; gap: 6px; }
+
+    /* About modal */
+    .modal-backdrop {
+      position: fixed; inset: 0; display: none; background: rgba(0,0,0,0.5); backdrop-filter: blur(2px);
+      align-items: center; justify-content: center; z-index: 100;
+    }
+    .modal {
+      width: min(680px, 92vw);
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      padding: 16px;
+    }
+    .modal h3 { margin-top: 0; }
+    .modal .close {
+      float: right; cursor: pointer; border: 1px solid var(--border);
+      padding: 6px 10px; border-radius: 8px; background: var(--bg-soft);
+    }
+    .modal ul { margin: 8px 0 0 18px; color: var(--muted); }
+
+    /* Toast */
+    .toast {
+      position: fixed; left: 50%; bottom: 16px; transform: translateX(-50%);
+      background: var(--card); color: var(--text); border: 1px solid var(--border);
+      padding: 10px 12px; border-radius: 10px; box-shadow: var(--shadow); display: none; z-index: 200;
+    }
+
+    /* Errors */
+    .error {
+      color: var(--danger);
+      font-size: 12px;
+      margin-top: 4px;
+    }
+
+    /* Reduced motion */
+    @media (prefers-reduced-motion: reduce) {
+      .tile, .btn, .icon-btn { transition: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="app-header" aria-label="App Header">
+      <div class="title-wrap">
+        <h1 class="app-title">
+          <span class="badge">Reality Check</span> — <span data-i18n="title">Cost of Dreams Calculator</span>
+        </h1>
+      </div>
+      <div class="actions">
+        <button id="themeToggle" class="icon-btn" aria-label="Toggle theme" title="Toggle theme">
+          <span>🌓</span><span data-i18n="theme">Theme</span>
+        </button>
+        <button id="langToggle" class="icon-btn" aria-label="Toggle language" title="Toggle language">
+          <span>🌐</span><span id="langLabel">EN</span>
+        </button>
+        <button id="aboutBtn" class="icon-btn" aria-haspopup="dialog" aria-controls="aboutModal">
+          <span>ℹ️</span><span data-i18n="about">About</span>
+        </button>
+      </div>
+    </header>
+
+    <main class="layout" id="main">
+      <!-- Inputs Panel -->
+      <section class="panel" aria-labelledby="inputsTitle">
+        <h2 id="inputsTitle" data-i18n="inputs">Your Dream</h2>
+
+        <div class="field">
+          <label data-i18n="choosePreset">Choose a preset or create custom</label>
+          <div class="presets" id="presets" role="list"></div>
+        </div>
+
+        <div class="row two">
+          <div class="field">
+            <label for="goalTitle" data-i18n="customTitle">Custom Title</label>
+            <div class="control">
+              <input id="goalTitle" type="text" placeholder="My Big Goal" inputmode="text" autocomplete="off" />
+            </div>
+          </div>
+          <div class="field">
+            <label for="goalAmount" data-i18n="totalAmount">Total Amount</label>
+            <div class="control">
+              <input id="goalAmount" type="number" min="1" step="0.01" placeholder="0.00" />
+            </div>
+            <div id="amountErr" class="error" aria-live="polite"></div>
+          </div>
+        </div>
+
+        <div class="row two">
+          <div class="field">
+            <label for="startDate" data-i18n="startDate">Start Date</label>
+            <div class="control">
+              <input id="startDate" type="date" />
+            </div>
+          </div>
+          <div class="field">
+            <label data-i18n="timeline">Timeline</label>
+            <div class="control">
+              <select id="timelineMode" aria-label="Timeline mode">
+                <option value="date" data-i18n="targetDateOpt">Target Date</option>
+                <option value="years" data-i18n="yearsToAchieveOpt">Years to Achieve</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="row two" id="targetRow">
+          <div class="field" id="targetDateField">
+            <label for="targetDate" data-i18n="targetDate">Target Date</label>
+            <div class="control">
+              <input id="targetDate" type="date" />
+            </div>
+            <div id="dateErr" class="error" aria-live="polite"></div>
+          </div>
+          <div class="field" id="yearsField" style="display:none">
+            <label for="yearsToAchieve" data-i18n="yearsTo">Years to Achieve</label>
+            <div class="control">
+              <input id="yearsToAchieve" type="number" min="0.1" step="0.1" placeholder="2.0" />
+            </div>
+          </div>
+        </div>
+
+        <div class="row three">
+          <div class="field">
+            <label for="currency" data-i18n="currency">Currency</label>
+            <div class="control">
+              <select id="currency">
+                <option value="INR">INR ₹</option>
+                <option value="USD">USD $</option>
+                <option value="EUR">EUR €</option>
+              </select>
+            </div>
+            <div class="hint" data-i18n="currencyHint">Rates cached 12h. Works offline with fallback.</div>
+          </div>
+
+          <div class="field">
+            <label for="income" data-i18n="monthlyIncome">Monthly Income (optional)</label>
+            <div class="control">
+              <input id="income" type="number" min="0" step="0.01" placeholder="0.00" />
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="currentSave" data-i18n="currentSaving">Current Monthly Saving (optional)</label>
+            <div class="control">
+              <input id="currentSave" type="number" min="0" step="0.01" placeholder="0.00" />
+            </div>
+          </div>
+        </div>
+
+        <div class="row two">
+          <div class="field">
+            <label data-i18n="priority">Savings Priority</label>
+            <div class="slider-wrap">
+              <input id="priority" type="range" min="1" max="3" step="1" value="2" aria-valuemin="1" aria-valuemax="3" aria-valuenow="2" />
+              <div id="priorityLabel" aria-hidden="true">Medium</div>
+            </div>
+            <div class="hint" data-i18n="priorityHint">Low 10% • Medium 20% • High 30%</div>
+          </div>
+          <div class="field">
+            <label data-i18n="inflation">Inflation</label>
+            <div class="control">
+              <input id="applyInflation" type="checkbox" checked aria-label="Apply Inflation" />
+              <input id="inflationRate" type="number" min="0" max="100" step="0.1" value="4" style="max-width:120px" aria-label="Inflation Rate (%)" />
+              <span>%</span>
+            </div>
+            <div class="hint" data-i18n="inflationHint">Applied monthly from today to target</div>
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button id="tryExample" class="btn secondary">🎲 <span data-i18n="tryExample">Try Example</span></button>
+          <button id="calculate" class="btn">🧮 <span data-i18n="calculate">Calculate</span></button>
+          <button id="reset" class="btn secondary">♻️ <span data-i18n="reset">Reset</span></button>
+          <button id="saveDream" class="btn">💾 <span data-i18n="save">Save Dream</span></button>
+        </div>
+        <div class="sub-actions">
+          <button id="downloadReport" class="btn secondary">📄 <span data-i18n="downloadReport">Download Report (PDF)</span></button>
+          <button id="exportImage" class="btn secondary">🖼️ <span data-i18n="exportImage">Export Image</span></button>
+          <button id="shareBtn" class="btn secondary">🔗 <span data-i18n="share">Share</span></button>
+        </div>
+        <div class="sub-actions" style="grid-template-columns: 1fr;">
+          <button id="copyShareText" class="btn secondary">📋 <span data-i18n="copyText">Copy Share Text</span></button>
+        </div>
+
+        <div class="saved">
+          <h2 data-i18n="savedDreams">Saved Dreams</h2>
+          <div id="savedList" class="saved-list" role="list"></div>
+        </div>
+      </section>
+
+      <!-- Result Panel -->
+      <section class="panel" aria-labelledby="resultTitle">
+        <h2 id="resultTitle" data-i18n="liveResult">Live Result</h2>
+        <div id="resultCard" class="result-card" aria-live="polite">
+          <div class="goal-head">
+            <div class="goal-title">
+              <span id="goalIcon" aria-hidden="true">🌟</span>
+              <span id="goalName">—</span>
+            </div>
+            <div class="goal-amount" id="goalTotal">—</div>
+          </div>
+          <div class="kv">
+            <div><strong data-i18n="start">Start:</strong> <span id="resStart">—</span></div>
+            <div><strong data-i18n="target">Target:</strong> <span id="resTarget">—</span></div>
+            <div><strong data-i18n="monthsRemain">Months:</strong> <span id="resMonths">—</span></div>
+            <div><strong data-i18n="inflApplied">Inflation Applied:</strong> <span id="resInflation">—</span></div>
+          </div>
+          <div class="req">
+            <span data-i18n="requiredMonthly">Required Monthly:</span>
+            <span id="resRequired">—</span>
+          </div>
+          <div class="scenario">
+            <div class="block">
+              <div class="label" data-i18n="currentScenario">If you keep current saving</div>
+              <div class="text" id="resCurrent">—</div>
+            </div>
+            <div class="block">
+              <div class="label" data-i18n="suggestScenario">Suggested plan</div>
+              <div class="text" id="resSuggested">—</div>
+            </div>
+            <div class="tips" id="tips"></div>
+            <div class="mini" id="breakdown">—</div>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-head">
+            <div><strong data-i18n="progressChart">Progress Chart</strong></div>
+            <div class="legend" id="legend">
+              <span><span class="dot" style="background:#49a5ff"></span><span data-i18n="reqLegend">Required</span></span>
+              <span id="legendCurr" style="display:none"><span class="dot" style="background:#ff6b6b"></span><span data-i18n="currentLegend">Current</span></span>
+              <span><span class="dot" style="background:#7ee787"></span><span data-i18n="suggLegend">Suggested</span></span>
+            </div>
+          </div>
+          <div class="chart-wrap">
+            <div id="tooltip" class="tooltip" role="tooltip"></div>
+            <canvas id="chart" width="700" height="280" aria-label="Savings chart"></canvas>
+          </div>
+        </div>
+
+        <div id="srLive" class="sr-only" aria-live="polite" style="position:absolute;left:-9999px;height:1px;width:1px;overflow:hidden;"></div>
+      </section>
+    </main>
+  </div>
+
+  <!-- About Modal -->
+  <div id="aboutModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="aboutTitle" aria-hidden="true">
+    <div class="modal">
+      <button class="close" id="aboutClose" aria-label="Close">✕</button>
+      <h3 id="aboutTitle">About Reality Check</h3>
+      <p>
+        This tool helps you estimate how much you need to save each month to reach your dream.
+        Assumptions:
+      </p>
+      <ul>
+        <li>Default annual inflation is 4% (compounded monthly from today to target date when enabled).</li>
+        <li>Preset costs are example values for quick start; adjust as needed.</li>
+        <li>Required monthly saving = ceil(AdjustedTotal / MonthsRemaining).</li>
+        <li>Suggested saving = max(required, ceil(income * priority%)).</li>
+      </ul>
+      <p>
+        Exports: PDF uses html2canvas + jsPDF when available, otherwise use your browser’s “Print to PDF”. Image export falls back to a built-in share card when offline.
+      </p>
+    </div>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script>
+  // ===========================
+  // Reality Check — App Script
+  // ===========================
+
+  // Debug flag
+  const DEBUG = false; // set true to see console logs
+
+  // Defaults
+  const DEFAULTS = {
+    INFLATION_ANNUAL: 4.0, // %
+    PRIORITY_MAP: { 1: { key: 'low', pct: 0.10, label: {en:'Low', hi:'कम'} },
+                    2: { key: 'med', pct: 0.20, label: {en:'Medium', hi:'मध्यम'} },
+                    3: { key: 'high', pct: 0.30, label: {en:'High', hi:'उच्च'} } },
+    CURRENCIES: ['INR', 'USD', 'EUR'],
+    RATES_TTL_MS: 12 * 60 * 60 * 1000 // 12h
+  };
+
+  // i18n Strings
+  const STR = {
+    en: {
+      title: "Cost of Dreams Calculator",
+      theme: "Theme",
+      about: "About",
+      inputs: "Your Dream",
+      choosePreset: "Choose a preset or create custom",
+      customTitle: "Custom Title",
+      totalAmount: "Total Amount",
+      startDate: "Start Date",
+      timeline: "Timeline",
+      targetDateOpt: "Target Date",
+      yearsToAchieveOpt: "Years to Achieve",
+      targetDate: "Target Date",
+      yearsTo: "Years to Achieve",
+      currency: "Currency",
+      currencyHint: "Rates cached 12h. Works offline with fallback.",
+      monthlyIncome: "Monthly Income (optional)",
+      currentSaving: "Current Monthly Saving (optional)",
+      priority: "Savings Priority",
+      priorityHint: "Low 10% • Medium 20% • High 30%",
+      inflation: "Inflation",
+      inflationHint: "Applied monthly from today to target",
+      tryExample: "Try Example",
+      calculate: "Calculate",
+      reset: "Reset",
+      save: "Save Dream",
+      downloadReport: "Download Report (PDF)",
+      exportImage: "Export Image",
+      share: "Share",
+      copyText: "Copy Share Text",
+      savedDreams: "Saved Dreams",
+      liveResult: "Live Result",
+      start: "Start",
+      target: "Target",
+      monthsRemain: "Months",
+      inflApplied: "Inflation Applied",
+      requiredMonthly: "Required Monthly:",
+      currentScenario: "If you keep current saving",
+      suggestScenario: "Suggested plan",
+      progressChart: "Progress Chart",
+      reqLegend: "Required",
+      currentLegend: "Current",
+      suggLegend: "Suggested",
+      errors: {
+        amount: "Please enter a valid total amount (> 0).",
+        dates: "Start date must be before target date.",
+        months: "At least 1 full month must remain."
+      },
+      msgs: {
+        saved: "Saved!",
+        deleted: "Deleted dream",
+        copied: "Share text copied",
+        exported: "Exported image",
+        pdfReady: "PDF ready",
+        shareNA: "Sharing not supported on this device",
+        fxFetchFail: "Rate fetch failed — using cached/fallback rates",
+        offline: "You're offline — using cached/fallback"
+      },
+      tips: {
+        coffee: (daily, cur) => `Cut daily treats by ${cur}${daily} to meet your goal.`,
+        delay: (m, cur, monthly) => `Delay by ${m} months to reduce monthly to ${cur}${monthly}.`,
+        percent: (p) => `Increase savings to ${p}% of income for a safer plan.`
+      },
+      monthsFmt: (m) => `${m} months`,
+      yearsApprox: (m) => `(~${(m/12).toFixed(1)} years)`
+    },
+    hi: {
+      title: "सपनों की कीमत कैलकुलेटर",
+      theme: "थीम",
+      about: "जानकारी",
+      inputs: "आपका सपना",
+      choosePreset: "प्रीसेट चुनें या कस्टम बनाएं",
+      customTitle: "कस्टम शीर्षक",
+      totalAmount: "कुल राशि",
+      startDate: "आरंभ तिथि",
+      timeline: "समय सीमा",
+      targetDateOpt: "लक्ष्य तिथि",
+      yearsToAchieveOpt: "वर्ष (लक्ष्य तक)",
+      targetDate: "लक्ष्य तिथि",
+      yearsTo: "लक्ष्य तक वर्ष",
+      currency: "मुद्रा",
+      currencyHint: "12 घंटे तक दरें कैश — ऑफलाइन फॉलबैक।",
+      monthlyIncome: "मासिक आय (वैकल्पिक)",
+      currentSaving: "वर्तमान मासिक बचत (वैकल्पिक)",
+      priority: "बचत प्राथमिकता",
+      priorityHint: "कम 10% • मध्यम 20% • उच्च 30%",
+      inflation: "मुद्रास्फीति",
+      inflationHint: "आज से लक्ष्य तक मासिक लागू",
+      tryExample: "उदाहरण देखें",
+      calculate: "कैलकुलेट",
+      reset: "रीसेट",
+      save: "सपना सहेजें",
+      downloadReport: "रिपोर्ट डाउनलोड (PDF)",
+      exportImage: "छवि निर्यात",
+      share: "शेयर",
+      copyText: "शेयर टेक्स्ट कॉपी",
+      savedDreams: "सहेजे सपने",
+      liveResult: "लाइव परिणाम",
+      start: "आरंभ",
+      target: "लक्ष्य",
+      monthsRemain: "महीने",
+      inflApplied: "मुद्रास्फीति लागू",
+      requiredMonthly: "आवश्यक मासिक:",
+      currentScenario: "यदि आप वर्तमान बचत रखें",
+      suggestScenario: "सुझावित योजना",
+      progressChart: "प्रगति चार्ट",
+      reqLegend: "आवश्यक",
+      currentLegend: "वर्तमान",
+      suggLegend: "सुझावित",
+      errors: {
+        amount: "कृपया मान्य कुल राशि (> 0) दर्ज करें।",
+        dates: "आरंभ तिथि लक्ष्य तिथि से पहले हो।",
+        months: "कम से कम 1 महीना होना चाहिए।"
+      },
+      msgs: {
+        saved: "सहेजा गया!",
+        deleted: "सपना हटाया गया",
+        copied: "शेयर टेक्स्ट कॉपी",
+        exported: "छवि बनी",
+        pdfReady: "PDF तैयार",
+        shareNA: "शेयर समर्थित नहीं",
+        fxFetchFail: "दरें नहीं मिलीं — कैश/फॉलबैक उपयोग",
+        offline: "आप ऑफलाइन हैं — कैश/फॉलबैक उपयोग"
+      },
+      tips: {
+        coffee: (daily, cur) => `रोज़ाना खर्च ${cur}${daily} घटाएँ।`,
+        delay: (m, cur, monthly) => `${m} माह लक्ष्य बढ़ाएँ, मासिक ${cur}${monthly} होगा।`,
+        percent: (p) => `आय का ${p}% बचत करें।`
+      },
+      monthsFmt: (m) => `${m} महीने`,
+      yearsApprox: (m) => `(~${(m/12).toFixed(1)} वर्ष)`
+    }
+  };
+
+  // Presets (base values in INR; realistic examples, editable)
+  // Example values (comment):
+  // iPhone 15 (128GB): ₹79900
+  // Goa Trip (7 days): ₹45000
+  // US Masters (tuition + living, 2 years): ₹40,00,000
+  // Wedding (basic): ₹6,00,000
+  // Car Downpayment: ₹2,00,000
+  // House Downpayment: ₹15,00,000
+  const PRESETS = [
+    { id: 'iphone', icon: '📱', name: 'iPhone', amountINR: 79900 },
+    { id: 'goa', icon: '🏖️', name: 'Goa Trip (7d)', amountINR: 45000 },
+    { id: 'masters', icon: '🎓', name: 'US Masters', amountINR: 4000000 },
+    { id: 'wedding', icon: '💍', name: 'Wedding (basic)', amountINR: 600000 },
+    { id: 'car', icon: '🚗', name: 'Car Downpayment', amountINR: 200000 },
+    { id: 'house', icon: '🏠', name: 'House Downpayment', amountINR: 1500000 }
+  ];
+
+  // Fallback exchange rates with INR as base (comment: approximate sample)
+  // If offline and no cache, these will be used.
+  const FALLBACK_RATES_INR_BASE = {
+    base: 'INR',
+    time: 0,
+    rates: {
+      INR: 1.0,
+      USD: 0.012, // 1 INR ~ 0.012 USD
+      EUR: 0.011  // 1 INR ~ 0.011 EUR
+    }
+  };
+
+  // App State
+  const S = {
+    lang: localStorage.getItem('rc_lang') || 'en',
+    theme: localStorage.getItem('rc_theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'),
+    currency: localStorage.getItem('rc_currency') || 'INR',
+    rates: null, // {base,rates,time}
+    lastCalc: null, // store last result
+    reduced: window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  };
+
+  // Utilities
+  const $ = (sel, el=document) => el.querySelector(sel);
+  const $$ = (sel, el=document) => Array.from(el.querySelectorAll(sel));
+  const toast = (msg) => {
+    const t = $('#toast');
+    t.textContent = msg;
+    t.style.display = 'block';
+    setTimeout(() => { t.style.display = 'none'; }, 1800);
+  };
+  const log = (...a) => { if (DEBUG) console.log('[RC]', ...a); };
+
+  // Sanitize text (basic) - strip tags
+  function sanitizeText(s) {
+    if (typeof s !== 'string') return '';
+    return s.replace(/[<>]/g, '');
+  }
+
+  function setTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    S.theme = theme;
+    localStorage.setItem('rc_theme', theme);
+    // Regenerate PNG icons for current theme
+    try { ensurePngIcons(); } catch {}
+  }
+
+  function setLang(lang) {
+    S.lang = lang;
+    localStorage.setItem('rc_lang', lang);
+    // Swap UI texts
+    $$('[data-i18n]').forEach(node => {
+      const key = node.getAttribute('data-i18n');
+      const val = STR[lang][key];
+      if (!val) return;
+      if (typeof val === 'string') node.textContent = val;
+    });
+    // Special for select option text inside <option data-i18n="">
+    $$('option[data-i18n]').forEach(opt => {
+      const key = opt.getAttribute('data-i18n');
+      const val = STR[lang][key];
+      if (val) opt.textContent = val;
+    });
+    // Title label
+    $('#langLabel').textContent = lang.toUpperCase() === 'EN' ? 'EN' : (lang === 'en' ? 'EN' : 'HI');
+    document.title = S.lang === 'hi'
+      ? 'Dream Budget Planner — बजट कैलकुलेटर और खर्च ट्रैकर'
+      : 'Dream Budget Planner — Budget Calculator & Expense Tracker';
+    // Switch manifest for install name on different languages
+    const manifestLink = document.querySelector('link[rel="manifest"]');
+    if (manifestLink) {
+      manifestLink.setAttribute('href', lang === 'hi' ? 'manifest-hi.webmanifest' : 'manifest.webmanifest');
+    }
+    // Priority label
+    updatePriorityLabel();
+    // Re-render result texts
+    if (S.lastCalc) renderResult(S.lastCalc);
+  }
+
+  // Money formatting using integer minor units (cents/paise)
+  function formatMoneyCents(cents, currency) {
+    const neg = cents < 0;
+    const abs = Math.abs(cents);
+    const value = abs / 100;
+    let out;
+    if (currency === 'INR') {
+      // Use en-IN for Indian grouping
+      out = value.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      return (neg ? '-' : '') + '₹' + out;
+    } else if (currency === 'USD') {
+      out = value.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+      return (neg ? '-' : '') + out;
+    } else if (currency === 'EUR') {
+      out = value.toLocaleString('en-IE', { style: 'currency', currency: 'EUR' }); // generic Euro
+      return (neg ? '-' : '') + out;
+    }
+    // fallback
+    out = value.toFixed(2);
+    return (neg ? '-' : '') + out + ' ' + currency;
+  }
+
+  // Convert major unit number to cents
+  function toCents(n) {
+    // n may be string or number
+    const num = Number(n);
+    if (!isFinite(num)) return 0;
+    return Math.round(num * 100);
+  }
+  function fromCents(c) {
+    return c / 100;
+  }
+
+  // Date helpers
+  function toISODateInput(d = new Date()) {
+    const z = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
+    return z.toISOString().split('T')[0];
+  }
+  function parseDateInput(val) {
+    if (!val) return null;
+    const d = new Date(val + 'T00:00:00');
+    return isNaN(d.getTime()) ? null : d;
+  }
+  // Full months between dates; if day2 < day1 subtract 1
+  function monthsBetween(d1, d2) {
+    let months = (d2.getFullYear() - d1.getFullYear()) * 12 + (d2.getMonth() - d1.getMonth());
+    if (d2.getDate() < d1.getDate()) months -= 1;
+    return months;
+  }
+
+  // Inflation factor monthly compounding from today->target
+  function inflationAdjustedCents(baseCents, annualRatePct, targetDate) {
+    const rMonthly = (Number(annualRatePct) || 0) / 100 / 12;
+    const today = new Date();
+    let m = monthsBetween(today, targetDate);
+    if (m < 0) m = 0;
+    if (rMonthly <= 0 || m === 0) return baseCents;
+    // compute factor = (1 + rMonthly)^m using JS number; then round to cents
+    const factor = Math.pow(1 + rMonthly, m);
+    return Math.round(baseCents * factor);
+  }
+
+  // FX rates storage
+  const RATES_KEY = 'rc_rates_'; // + base
+  async function fetchExchangeRates(base='INR') {
+    const now = Date.now();
+    // Check cache
+    const key = RATES_KEY + base;
+    try {
+      const raw = localStorage.getItem(key);
+      if (raw) {
+        const cached = JSON.parse(raw);
+        if (cached && (now - cached.time) < DEFAULTS.RATES_TTL_MS) {
+          log('Using cached FX rates', cached);
+          return cached;
+        }
+      }
+    } catch {}
+    // Detect offline
+    if (!navigator.onLine) {
+      toast(STR[S.lang].msgs.offline);
+      const fb = Object.assign({}, FALLBACK_RATES_INR_BASE, { base: base });
+      if (base !== 'INR') {
+        // simple invert/fwd using FALLBACK (limited)
+        fb.rates = convertFallbackBase(base);
+      }
+      return fb;
+    }
+    try {
+      // NOTE: swap the URL below to your preferred API if needed.
+      // No API key required for exchangerate.host (as of writing).
+      const url = `https://api.exchangerate.host/latest?base=${encodeURIComponent(base)}&symbols=INR,USD,EUR`;
+      const res = await fetch(url, { cache: 'no-store' });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const data = await res.json();
+      const out = { base, time: now, rates: data.rates };
+      localStorage.setItem(key, JSON.stringify(out));
+      log('Fetched FX rates', out);
+      return out;
+    } catch (e) {
+      log('FX fetch failed', e);
+      toast(STR[S.lang].msgs.fxFetchFail);
+      // fallback
+      const fb = Object.assign({}, FALLBACK_RATES_INR_BASE, { base: base });
+      if (base !== 'INR') {
+        fb.rates = convertFallbackBase(base);
+      }
+      return fb;
+    }
+  }
+  function convertFallbackBase(base) {
+    // Build rates for requested base using INR fallback base
+    const inrBase = FALLBACK_RATES_INR_BASE.rates; // value in per INR
+    // We need rates[target] meaning 1 base = X target
+    // If base=USD, then rate[INR] = 1 USD in INR = 1/inrBase.USD
+    const r = {};
+    DEFAULTS.CURRENCIES.forEach(cur => {
+      if (cur === base) r[cur] = 1;
+      else {
+        if (base === 'INR') r[cur] = inrBase[cur];
+        else {
+          // cross: base->INR->target
+          const baseToINR = 1 / inrBase[base];
+          const inrToTarget = inrBase[cur];
+          r[cur] = baseToINR * inrToTarget;
+        }
+      }
+    });
+    return r;
+  }
+
+  // Currency conversion
+  function convertAmountCents(cents, fromCur, toCur) {
+    if (fromCur === toCur) return cents;
+    const rates = S.rates && S.rates.rates;
+    let r;
+    if (rates && S.rates.base === fromCur) {
+      r = rates[toCur];
+    } else if (rates && S.rates.base === toCur) {
+      // if base is target: convert fromCur->base: 1/rate[fromCur]
+      r = 1 / rates[fromCur];
+    } else if (rates) {
+      // convert via base
+      const fromToBase = 1 / rates[fromCur]; // base per from
+      const baseToTo = rates[toCur]; // to per base
+      r = fromToBase * baseToTo;
+    } else {
+      // fallback approximate cross
+      const fb = convertFallbackBase(fromCur);
+      r = fb[toCur];
+    }
+    const major = fromCents(cents) * (r || 1);
+    return toCents(major);
+  }
+
+  // Build presets UI
+  function buildPresetsUI() {
+    const wrap = $('#presets');
+    wrap.innerHTML = '';
+    PRESETS.forEach(p => {
+      const div = document.createElement('div');
+      div.className = 'tile';
+      div.setAttribute('role','button');
+      div.setAttribute('tabindex','0');
+      div.dataset.id = p.id;
+      div.innerHTML = `
+        <div class="icon">${p.icon}</div>
+        <div class="name">${p.name}</div>
+        <div class="amount" data-cur="${S.currency}"></div>
+        <div class="inline-edit"><input type="number" step="0.01" min="0" aria-label="Edit amount"></div>
+      `;
+      wrap.appendChild(div);
+    });
+    refreshPresetAmounts();
+  }
+
+  // Update preset amounts display according to current currency
+  function refreshPresetAmounts() {
+    $$('#presets .tile').forEach(tile => {
+      const id = tile.dataset.id;
+      const p = PRESETS.find(x => x.id === id);
+      let amtINR = toCents(p.amountINR);
+      let amt = amtINR;
+      if (S.currency !== 'INR') {
+        amt = convertAmountCents(amtINR, 'INR', S.currency);
+      }
+      $('.amount', tile).textContent = formatMoneyCents(amt, S.currency);
+      const edit = $('.inline-edit input', tile);
+      edit.value = (fromCents(amt)).toFixed(2);
+      // events
+      tile.onclick = () => selectPreset(tile, p, amt);
+      tile.onkeydown = (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); tile.click(); } };
+      edit.oninput = (e) => {
+        // live adjust goal if selected
+        if (tile.classList.contains('selected')) {
+          $('#goalAmount').value = e.target.value;
+        }
+      };
+    });
+  }
+
+  function selectPreset(tile, p, amtCents) {
+    $$('#presets .tile').forEach(t => t.classList.remove('selected'));
+    tile.classList.add('selected');
+    $('#goalTitle').value = p.name;
+    $('#goalAmount').value = (fromCents(amtCents)).toFixed(2);
+    $('#goalIcon').textContent = p.icon;
+    announce(`${p.name} selected`);
+  }
+
+  // Priority label update
+  function updatePriorityLabel() {
+    const v = Number($('#priority').value);
+    const map = DEFAULTS.PRIORITY_MAP[v] || DEFAULTS.PRIORITY_MAP[2];
+    $('#priorityLabel').textContent = S.lang === 'hi' ? map.label.hi : map.label.en;
+  }
+
+  // Validation
+  function validateInputs() {
+    let ok = true;
+    const total = Number($('#goalAmount').value);
+    const amountErr = $('#amountErr');
+    amountErr.textContent = '';
+    if (!(total > 0)) {
+      amountErr.textContent = STR[S.lang].errors.amount;
+      ok = false;
+    }
+    const start = parseDateInput($('#startDate').value);
+    const mode = $('#timelineMode').value;
+    const dateErr = $('#dateErr');
+    dateErr.textContent = '';
+    let monthsRem = 0;
+    let target = null;
+    if (mode === 'date') {
+      target = parseDateInput($('#targetDate').value);
+      if (!start || !target || !(start < target)) {
+        dateErr.textContent = STR[S.lang].errors.dates;
+        ok = false;
+      } else {
+        monthsRem = monthsBetween(start, target);
+        if (monthsRem < 1) {
+          dateErr.textContent = STR[S.lang].errors.months;
+          ok = false;
+        }
+      }
+    } else {
+      const years = Number($('#yearsToAchieve').value);
+      if (!(years > 0)) {
+        dateErr.textContent = STR[S.lang].errors.months;
+        ok = false;
+      } else {
+        monthsRem = Math.ceil(years * 12);
+        target = new Date(start.getTime());
+        target.setMonth(target.getMonth() + monthsRem);
+      }
+    }
+    return { ok, monthsRem, start, target };
+  }
+
+  // Main calculation (precise integer cents arithmetic)
+  function calculate() {
+    const v = validateInputs();
+    if (!v.ok) return null;
+
+    const title = sanitizeText($('#goalTitle').value || '');
+    const currency = $('#currency').value;
+    const icon = $('#goalIcon').textContent || '🌟';
+
+    // read total amount in selected currency
+    const totalMajor = Number($('#goalAmount').value);
+    let totalCents = toCents(totalMajor);
+
+    const applyInfl = $('#applyInflation').checked;
+    const inflRate = Number($('#inflationRate').value || DEFAULTS.INFLATION_ANNUAL);
+
+    const start = v.start;
+    const target = v.target;
+    let monthsRem = v.monthsRem;
+
+    const currentSave = toCents(Number($('#currentSave').value || 0));
+    const income = toCents(Number($('#income').value || 0));
+    const priority = Number($('#priority').value);
+    const recPct = DEFAULTS.PRIORITY_MAP[priority]?.pct || 0.20;
+
+    // Adjust for inflation from today->target (spec requirement)
+    const adjustedTotal = applyInfl ? inflationAdjustedCents(totalCents, inflRate, target) : totalCents;
+
+    // requiredMonthlySaving = ceil(adjustedTotal / monthsRemaining)
+    const required = Math.ceil(adjustedTotal / monthsRem);
+
+    // If current monthly provided: monthsNeeded = ceil(adjustedTotal / currentMonthlySavings)
+    let monthsIfCurrent = null;
+    if (currentSave > 0) {
+      monthsIfCurrent = Math.ceil(adjustedTotal / currentSave);
+    }
+
+    // Suggested monthly saving
+    let suggestedByIncome = 0;
+    if (income > 0) {
+      suggestedByIncome = Math.ceil(income * recPct);
+    }
+    const suggested = Math.max(required, suggestedByIncome || 0) || required;
+    const monthsIfSuggested = Math.ceil(adjustedTotal / (suggested || 1));
+
+    // Tips
+    const tips = [];
+    // coffee: daily shortfall if current < required
+    if (currentSave > 0 && currentSave < required) {
+      const shortfall = required - currentSave;
+      const daily = Math.ceil(shortfall / 30);
+      tips.push(STR[S.lang].tips.coffee(fromCents(daily).toFixed(2), currencySymbol(currency)));
+    }
+    // delay: months more to reduce monthly to <= suggested (only if suggested < required)
+    if (suggested < required) {
+      // Find m such that ceil(adjustedTotal / (monthsRem + m)) <= suggested
+      let add = 1;
+      while (add < 120 && Math.ceil(adjustedTotal / (monthsRem + add)) > suggested) add++;
+      const newMonthly = Math.ceil(adjustedTotal / (monthsRem + add));
+      tips.push(STR[S.lang].tips.delay(add, currencySymbol(currency), fromCents(newMonthly).toFixed(2)));
+    } else {
+      // suggest percent of income
+      tips.push(STR[S.lang].tips.percent(Math.round(recPct * 100)));
+    }
+
+    // breakdown
+    const savedIfRequired = required * monthsRem;
+    const savedIfCurrent = currentSave * monthsRem;
+    const breakdown = {
+      goal: adjustedTotal,
+      reqSaved: savedIfRequired,
+      curSaved: savedIfCurrent
+    };
+
+    const out = {
+      title, icon, currency,
+      totalCents,
+      adjustedTotal,
+      applyInfl,
+      inflRate,
+      start, target, monthsRem,
+      required,
+      currentSave,
+      monthsIfCurrent,
+      income,
+      recPct,
+      suggested,
+      monthsIfSuggested,
+      tips,
+      breakdown
+    };
+    S.lastCalc = out;
+    // Persist last session
+    persistLastState();
+    return out;
+  }
+
+  function currencySymbol(cur) {
+    if (cur === 'INR') return '₹';
+    if (cur === 'USD') return '$';
+    if (cur === 'EUR') return '€';
+    return '';
+  }
+
+  // Render result card
+  function renderResult(r) {
+    if (!r) return;
+    $('#goalName').textContent = r.title || '—';
+    $('#goalIcon').textContent = r.icon || '🌟';
+    $('#goalTotal').textContent = formatMoneyCents(r.adjustedTotal, r.currency);
+    $('#resStart').textContent = toISODateInput(r.start);
+    $('#resTarget').textContent = toISODateInput(r.target);
+    $('#resMonths').textContent = r.monthsRem + '';
+    $('#resInflation').textContent = r.applyInfl ? `${r.inflRate.toFixed(1)}%` : '—';
+    $('#resRequired').textContent = formatMoneyCents(r.required, r.currency);
+
+    // Scenarios
+    if (r.currentSave > 0) {
+      let txt = `${STR[S.lang].monthsFmt(r.monthsIfCurrent)} ${STR[S.lang].yearsApprox(r.monthsIfCurrent)}`;
+      if (r.currentSave < r.required) {
+        const shortfall = r.required - r.currentSave;
+        txt += ` • Shortfall ${formatMoneyCents(shortfall, r.currency)}/mo`;
+      }
+      $('#resCurrent').textContent = txt;
+      $('#legendCurr').style.display = '';
+    } else {
+      $('#resCurrent').textContent = '—';
+      $('#legendCurr').style.display = 'none';
+    }
+    const suggTxt = `${formatMoneyCents(r.suggested, r.currency)}/mo • ${STR[S.lang].monthsFmt(r.monthsIfSuggested)} ${STR[S.lang].yearsApprox(r.monthsIfSuggested)}`;
+    $('#resSuggested').textContent = suggTxt;
+
+    // Tips
+    const tipsWrap = $('#tips');
+    tipsWrap.innerHTML = '';
+    r.tips.forEach(t => {
+      const div = document.createElement('div');
+      div.className = 'tip';
+      div.textContent = t;
+      tipsWrap.appendChild(div);
+    });
+
+    // Breakdown mini
+    $('#breakdown').textContent =
+      `Saved (Required Plan): ${formatMoneyCents(r.breakdown.reqSaved, r.currency)} • Goal: ${formatMoneyCents(r.breakdown.goal, r.currency)}`;
+
+    // SR live summary
+    announce(`Required monthly ${fromCents(r.required).toFixed(2)} ${r.currency}, months remaining ${r.monthsRem}`);
+
+    // Chart
+    updateChart(r);
+  }
+
+  // Accessible live announcer
+  function announce(text) {
+    $('#srLive').textContent = text;
+  }
+
+  // Chart (Canvas)
+  const chartCanvas = $('#chart');
+  const ttip = $('#tooltip');
+  let chartAnim = null;
+
+  function buildSeries(r) {
+    // Plot up to the longest months among scenarios (cap to 240)
+    const maxMonths = Math.min(Math.max(r.monthsRem, r.monthsIfCurrent || 0, r.monthsIfSuggested || 0), 240);
+    const xs = Array.from({length: maxMonths + 1}, (_, i) => i); // month index
+    const required = xs.map(m => m * r.required);
+    const suggested = xs.map(m => m * r.suggested);
+    let current = null;
+    if (r.currentSave > 0) current = xs.map(m => m * r.currentSave);
+    const goalLine = r.adjustedTotal;
+
+    return { xs, required, suggested, current, goal: goalLine };
+  }
+
+  function updateChart(r) {
+    if (!chartCanvas) return;
+    const ctx = chartCanvas.getContext('2d');
+    const { width, height } = chartCanvas.getBoundingClientRect();
+    // Set actual canvas size to CSS size for crisp lines
+    const ratio = Math.min(window.devicePixelRatio || 1, 2);
+    chartCanvas.width = Math.floor(width * ratio);
+    chartCanvas.height = Math.floor(height * ratio);
+    ctx.scale(ratio, ratio);
+
+    const P = 12; // padding
+    const W = width - P*2;
+    const H = height - P*2;
+
+    const data = buildSeries(r);
+    const maxY = Math.max(
+      r.adjustedTotal,
+      data.required[data.required.length - 1],
+      data.suggested[data.suggested.length - 1],
+      data.current ? data.current[data.current.length - 1] : 0
+    );
+    const yMax = niceCeil(maxY);
+    const xMax = data.xs[data.xs.length - 1];
+
+    const toX = (m) => P + (m / xMax) * W;
+    const toY = (v) => P + H - (v / yMax) * H;
+
+    // Draw axes
+    ctx.clearRect(0, 0, width, height);
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--border');
+    ctx.beginPath();
+    ctx.moveTo(P, P+H); ctx.lineTo(P+W, P+H); // x
+    ctx.moveTo(P, P); ctx.lineTo(P, P+H); // y
+    ctx.stroke();
+
+    // grid lines y
+    ctx.font = '12px ' + getComputedStyle(document.documentElement).getPropertyValue('--font');
+    ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--muted');
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'middle';
+    const ySteps = 4;
+    for (let i=0;i<=ySteps;i++){
+      const v = (yMax / ySteps) * i;
+      const y = toY(v);
+      ctx.strokeStyle = 'rgba(128,128,128,0.18)';
+      ctx.beginPath(); ctx.moveTo(P, y); ctx.lineTo(P+W, y); ctx.stroke();
+      ctx.fillText(formatMoneyCents(Math.round(v), r.currency), P - 6, y);
+    }
+
+    // Draw series with optional animation
+    const reqColor = '#49a5ff';
+    const curColor = '#ff6b6b';
+    const sugColor = '#7ee787';
+
+    const drawPath = (vals, color, fill=false, alpha=1) => {
+      ctx.strokeStyle = color;
+      ctx.globalAlpha = alpha;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      vals.forEach((v, i) => {
+        const x = toX(data.xs[i]);
+        const y = toY(v);
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+      ctx.stroke();
+      if (fill) {
+        ctx.globalAlpha = 0.12;
+        ctx.lineTo(toX(data.xs[data.xs.length - 1]), toY(0));
+        ctx.lineTo(toX(0), toY(0));
+        ctx.closePath();
+        ctx.fillStyle = color;
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+    };
+
+    let progress = 0;
+    cancelAnimationFrame(chartAnim);
+    const animate = () => {
+      progress = Math.min(1, progress + (S.reduced ? 1 : 0.08));
+      ctx.clearRect(0,0,width,height);
+      // axes again
+      ctx.lineWidth = 1;
+      ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--border');
+      ctx.beginPath();
+      ctx.moveTo(P, P+H); ctx.lineTo(P+W, P+H);
+      ctx.moveTo(P, P); ctx.lineTo(P, P+H);
+      ctx.stroke();
+      ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--muted');
+      ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+      for (let i=0;i<=ySteps;i++){
+        const v = (yMax / ySteps) * i;
+        const y = toY(v);
+        ctx.strokeStyle = 'rgba(128,128,128,0.18)';
+        ctx.beginPath(); ctx.moveTo(P, y); ctx.lineTo(P+W, y); ctx.stroke();
+        ctx.fillText(formatMoneyCents(Math.round(v), r.currency), P - 6, y);
+      }
+
+      // partial values for animation
+      const cut = Math.max(1, Math.floor(data.xs.length * progress));
+      drawPath(data.required.slice(0, cut), reqColor, true, 1);
+      if (data.current) drawPath(data.current.slice(0, cut), curColor, false, 0.9);
+      drawPath(data.suggested.slice(0, cut), sugColor, false, 1);
+
+      // goal horizontal line
+      ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+      ctx.setLineDash([4, 4]);
+      ctx.beginPath();
+      ctx.moveTo(toX(0), toY(r.adjustedTotal));
+      ctx.lineTo(toX(xMax), toY(r.adjustedTotal));
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      if (progress < 1) chartAnim = requestAnimationFrame(animate);
+    };
+    animate();
+
+    // Tooltip
+    chartCanvas.onmousemove = (e) => {
+      const rect = chartCanvas.getBoundingClientRect();
+      const x = (e.clientX - rect.left);
+      const m = Math.round((x - P) / (rect.width - P*2) * (data.xs.length - 1));
+      const idx = Math.max(0, Math.min(data.xs.length - 1, m));
+      const cx = P + (idx / (data.xs.length - 1)) * (rect.width - P*2);
+      const vals = [
+        { name: STR[S.lang].reqLegend, v: data.required[idx], color: reqColor },
+        ...(data.current ? [{ name: STR[S.lang].currentLegend, v: data.current[idx], color: curColor }] : []),
+        { name: STR[S.lang].suggLegend, v: data.suggested[idx], color: sugColor }
+      ];
+      ttip.style.display = 'block';
+      ttip.style.left = cx + 'px';
+      ttip.style.top = (e.clientY - rect.top - 8) + 'px';
+      ttip.innerHTML = `<div><strong>Month ${idx}</strong></div>` + vals.map(o => `<div style="color:${o.color}">${o.name}: ${formatMoneyCents(Math.round(o.v), r.currency)}</div>`).join('');
+    };
+    chartCanvas.onmouseleave = () => { ttip.style.display = 'none'; };
+  }
+
+  function niceCeil(n) {
+    if (n <= 0) return 1;
+    const pow = Math.pow(10, Math.floor(Math.log10(n)));
+    const m = n / pow;
+    let k;
+    if (m <= 1) k = 1;
+    else if (m <= 2) k = 2;
+    else if (m <= 5) k = 5;
+    else k = 10;
+    return k * pow;
+  }
+
+  // Generate PNG icons at runtime for platforms that prefer PNG (e.g., iOS)
+  function ensurePngIcons() {
+    const sizes = [192, 512, 180]; // 180 for apple-touch-icon
+    sizes.forEach(sz => {
+      const url = renderIconPng(sz);
+      createOrUpdateIconLink('icon', `${sz}x${sz}`, url, 'image/png');
+      if (sz === 180) createOrUpdateIconLink('apple-touch-icon', `${sz}x${sz}`, url, 'image/png');
+    });
+  }
+  function createOrUpdateIconLink(rel, sizes, href, type) {
+    let link = document.querySelector(`link[rel="${rel}"][sizes="${sizes}"]`);
+    if (!link) { link = document.createElement('link'); link.rel = rel; link.sizes = sizes; if (type) link.type = type; document.head.appendChild(link); }
+    link.href = href;
+  }
+  function renderIconPng(size) {
+    const c = document.createElement('canvas'); c.width = c.height = size; const ctx = c.getContext('2d');
+    // background gradient
+    const g = ctx.createLinearGradient(0, 0, size, size);
+    if (S.theme === 'dark') { g.addColorStop(0, '#0b0f14'); g.addColorStop(1, '#131a22'); }
+    else { g.addColorStop(0, '#f6f7f9'); g.addColorStop(1, '#ffffff'); }
+    ctx.fillStyle = g;
+    // rounded rect
+    const r = Math.max(24, Math.floor(size * 0.18));
+    roundRectCanvas(ctx, 0, 0, size, size, r);
+    ctx.fill();
+    // RC text
+    ctx.fillStyle = S.theme === 'dark' ? '#49a5ff' : '#2563eb';
+    ctx.font = `bold ${Math.floor(size*0.42)}px ${getComputedStyle(document.documentElement).getPropertyValue('--font')}`;
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText('RC', size/2, size*0.54);
+    return c.toDataURL('image/png');
+  }
+  function roundRectCanvas(ctx, x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x+r, y);
+    ctx.arcTo(x+w, y,   x+w, y+h, r);
+    ctx.arcTo(x+w, y+h, x,   y+h, r);
+    ctx.arcTo(x,   y+h, x,   y,   r);
+    ctx.arcTo(x,   y,   x+w, y,   r);
+    ctx.closePath();
+  }
+
+  // Export to PDF (uses html2canvas + jsPDF when available; fallback message)
+  async function exportPDF() {
+    const card = $('#resultCard');
+    const chart = $('#chart');
+    const A4_W = 1080, A4_H = 1528; // portrait canvas target for better quality
+    const cardShot = await safeHtml2Canvas(card, { scale: 2 });
+    const chartShot = await safeHtml2Canvas(chart.parentElement, { scale: 2 });
+
+    if (!window.jspdf && !(window.jsPDF || (window.jspdf && window.jspdf.jsPDF))) {
+      toast(STR[S.lang].msgs.shareNA + ' (jsPDF not loaded). Use Print to PDF.');
+      window.print();
+      return;
+    }
+    const { jsPDF } = window.jspdf || window;
+    const pdf = new jsPDF({ orientation: 'p', unit: 'px', format: [A4_W, A4_H] });
+
+    // Header
+    pdf.setFontSize(18);
+    pdf.text(`Reality Check — ${S.lang==='hi'?STR.hi.title:STR.en.title}`, 24, 36);
+
+    // Place card image
+    const cardImg = cardShot ? cardShot.toDataURL('image/png') : null;
+    if (cardImg) pdf.addImage(cardImg, 'PNG', 24, 56, A4_W - 48, (A4_W - 48) * (cardShot.height / cardShot.width));
+
+    // Place chart image
+    const chartImg = chartShot ? chartShot.toDataURL('image/png') : null;
+    if (chartImg) pdf.addImage(chartImg, 'PNG', 24, A4_H - 24 - ((A4_W - 48) * 0.5), A4_W - 48, (A4_W - 48) * 0.5);
+
+    pdf.save('RealityCheck_Report.pdf');
+    toast(STR[S.lang].msgs.pdfReady);
+  }
+
+  // Export Image (prefer html2canvas; fallback to custom share card)
+  async function exportImage() {
+    // 1080x1350 portrait
+    const card = await renderShareCard();
+    const a = document.createElement('a');
+    a.href = card.toDataURL('image/png');
+    a.download = 'RealityCheck_Share.png';
+    a.click();
+    toast(STR[S.lang].msgs.exported);
+  }
+
+  async function safeHtml2Canvas(el, opts) {
+    if (!window.html2canvas) return null;
+    try {
+      const canvas = await window.html2canvas(el, Object.assign({ backgroundColor: null }, opts || {}));
+      return canvas;
+    } catch (e) {
+      log('html2canvas failed', e);
+      return null;
+    }
+  }
+
+  // Share (Web Share API with file; fallback copies text)
+  async function share() {
+    const text = buildShareText();
+    const card = await renderShareCard();
+    const blob = await new Promise(resolve => card.toBlob(resolve, 'image/png'));
+    const file = new File([blob], 'reality-check.png', { type: 'image/png' });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      try {
+        await navigator.share({ text, files: [file], title: 'Reality Check' });
+        return;
+      } catch {}
+    }
+    // fallback copy text
+    await copyShareText();
+  }
+
+  function buildShareText() {
+    const r = S.lastCalc;
+    if (!r) return 'Reality Check — Cost of Dreams';
+    const t = `${r.icon} ${r.title}\n` +
+      `Total: ${formatMoneyCents(r.adjustedTotal, r.currency)}\n` +
+      `Required: ${formatMoneyCents(r.required, r.currency)}/mo for ${r.monthsRem} months\n` +
+      `Suggested: ${formatMoneyCents(r.suggested, r.currency)}/mo (~${(r.monthsIfSuggested/12).toFixed(1)} years)\n` +
+      `#RealityCheck #CostOfDreams\n` +
+      `Link: https://example.com`;
+    return t;
+  }
+
+  async function copyShareText() {
+    const text = buildShareText();
+    try {
+      await navigator.clipboard.writeText(text);
+      toast(STR[S.lang].msgs.copied);
+    } catch {
+      // fallback text area
+      const ta = document.createElement('textarea');
+      ta.value = text; document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); } catch {}
+      ta.remove();
+      toast(STR[S.lang].msgs.copied);
+    }
+  }
+
+  // Render share card (canvas) independent of html2canvas
+  async function renderShareCard() {
+    const r = S.lastCalc || calculate();
+    const W = 1080, H = 1350;
+    const c = document.createElement('canvas');
+    c.width = W; c.height = H;
+    const ctx = c.getContext('2d');
+
+    // Background
+    ctx.fillStyle = (S.theme === 'dark') ? '#0b0f14' : '#ffffff';
+    ctx.fillRect(0, 0, W, H);
+
+    // Title
+    ctx.fillStyle = (S.theme === 'dark') ? '#e6edf3' : '#0b0f14';
+    ctx.font = '48px ' + getComputedStyle(document.documentElement).getPropertyValue('--font');
+    ctx.fillText('Reality Check', 48, 86);
+    ctx.font = '28px ' + getComputedStyle(document.documentElement).getPropertyValue('--font');
+    ctx.fillStyle = '#49a5ff';
+    ctx.fillText(S.lang==='hi'?STR.hi.title:STR.en.title, 48, 124);
+
+    // Card
+    const CARD_W = W - 96, CARD_H = 560, X = 48, Y = 160;
+    roundRect(ctx, X, Y, CARD_W, CARD_H, 24, (S.theme==='dark')?'#131a22':'#f8fafc', true, (S.theme==='dark')?'#1f2a35':'#e2e8f0');
+
+    ctx.fillStyle = (S.theme==='dark') ? '#e6edf3' : '#0b0f14';
+    ctx.font = '36px ' + getComputedStyle(document.documentElement).getPropertyValue('--font');
+    ctx.fillText(`${r.icon} ${r.title}`, X+24, Y+56);
+    ctx.font = '28px ' + getComputedStyle(document.documentElement).getPropertyValue('--font');
+    ctx.fillStyle = '#7ee787';
+    ctx.fillText(`Total: ${formatMoneyCents(r.adjustedTotal, r.currency)}`, X+24, Y+96);
+
+    ctx.fillStyle = (S.theme==='dark') ? '#a8b3be' : '#475569';
+    ctx.font = '24px ' + getComputedStyle(document.documentElement).getPropertyValue('--font');
+    ctx.fillText(`Start: ${toISODateInput(r.start)}    Target: ${toISODateInput(r.target)}    Months: ${r.monthsRem}`, X+24, Y+136);
+
+    ctx.fillStyle = (S.theme==='dark') ? '#e6edf3' : '#0b0f14';
+    ctx.font = '64px ' + getComputedStyle(document.documentElement).getPropertyValue('--font');
+    ctx.fillText(`Required: ${formatMoneyCents(r.required, r.currency)}/mo`, X+24, Y+200);
+
+    ctx.font = '28px ' + getComputedStyle(document.documentElement).getPropertyValue('--font');
+    ctx.fillStyle = '#49a5ff';
+    ctx.fillText(`Suggested: ${formatMoneyCents(r.suggested, r.currency)}/mo • ~${(r.monthsIfSuggested/12).toFixed(1)}y`, X+24, Y+244);
+
+    // Small tips
+    ctx.font = '24px ' + getComputedStyle(document.documentElement).getPropertyValue('--font');
+    ctx.fillStyle = (S.theme==='dark') ? '#a8b3be' : '#475569';
+    const tipY = Y + 288;
+    const maxTips = Math.min(3, r.tips.length);
+    for (let i=0;i<maxTips;i++) {
+      ctx.fillText('• ' + r.tips[i], X+24, tipY + i*32);
+    }
+
+    // Draw mini chart
+    const chartX = X + 24, chartY = Y + 360, chartW = CARD_W - 48, chartH = 300;
+    miniChart(ctx, chartX, chartY, chartW, chartH, r);
+
+    // Footer line
+    ctx.font = '24px ' + getComputedStyle(document.documentElement).getPropertyValue('--font');
+    ctx.fillStyle = (S.theme==='dark') ? '#a8b3be' : '#475569';
+    ctx.fillText('#RealityCheck  #CostOfDreams  https://example.com', 48, H - 36);
+
+    return c;
+  }
+
+  function roundRect(ctx, x, y, w, h, r, fill, stroke) {
+    ctx.beginPath();
+    ctx.moveTo(x+r, y);
+    ctx.arcTo(x+w, y,   x+w, y+h, r);
+    ctx.arcTo(x+w, y+h, x,   y+h, r);
+    ctx.arcTo(x,   y+h, x,   y,   r);
+    ctx.arcTo(x,   y,   x+w, y,   r);
+    if (fill) {
+      ctx.fillStyle = fill === true ? '#000' : fill;
+      ctx.fill();
+    }
+    if (stroke) {
+      ctx.strokeStyle = stroke === true ? '#000' : stroke;
+      ctx.stroke();
+    }
+  }
+  function miniChart(ctx, x, y, w, h, r) {
+    const d = buildSeries(r);
+    const maxY = Math.max(
+      r.adjustedTotal,
+      d.required[d.required.length-1],
+      d.suggested[d.suggested.length-1],
+      d.current ? d.current[d.current.length-1] : 0
+    );
+    const yMax = niceCeil(maxY);
+    const xMax = d.xs[d.xs.length-1];
+
+    const toX = (m) => x + (m / xMax) * w;
+    const toY = (v) => y + h - (v / yMax) * h;
+
+    // bg
+    roundRect(ctx, x, y, w, h, 12, (S.theme==='dark')?'#0f172a':'#f1f5f9', (S.theme==='dark')?'#1f2a35':'#e2e8f0');
+
+    // grid
+    ctx.strokeStyle = (S.theme==='dark') ? 'rgba(255,255,255,0.08)' : 'rgba(2,6,23,0.08)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    for (let i=0;i<=4;i++){
+      const yy = y + (i/4)*h;
+      ctx.moveTo(x, yy); ctx.lineTo(x+w, yy);
+    }
+    ctx.stroke();
+
+    const draw = (vals, col, fill=false) => {
+      ctx.strokeStyle = col; ctx.lineWidth = 3; ctx.beginPath();
+      vals.forEach((v, i) => {
+        const xx = toX(d.xs[i]);
+        const yy = toY(v);
+        if (i===0) ctx.moveTo(xx, yy); else ctx.lineTo(xx, yy);
+      });
+      ctx.stroke();
+      if (fill) {
+        ctx.globalAlpha = 0.12; ctx.lineTo(toX(d.xs[d.xs.length-1]), toY(0)); ctx.lineTo(toX(0), toY(0)); ctx.closePath();
+        ctx.fillStyle = col; ctx.fill(); ctx.globalAlpha = 1;
+      }
+    };
+    draw(d.required, '#49a5ff', true);
+    if (d.current) draw(d.current, '#ff6b6b');
+    draw(d.suggested, '#7ee787');
+    // goal line
+    ctx.setLineDash([6,6]); ctx.strokeStyle = (S.theme==='dark')?'#94a3b8':'#94a3b8'; ctx.beginPath();
+    ctx.moveTo(x, toY(r.adjustedTotal)); ctx.lineTo(x+w, toY(r.adjustedTotal)); ctx.stroke(); ctx.setLineDash([]);
+  }
+
+  // Persistence
+  function persistLastState() {
+    const state = collectInputs();
+    localStorage.setItem('rc_last_state', JSON.stringify(state));
+  }
+  function restoreLastState() {
+    try {
+      const raw = localStorage.getItem('rc_last_state');
+      if (!raw) return false;
+      const s = JSON.parse(raw);
+      applyInputs(s);
+      return true;
+    } catch { return false; }
+  }
+
+  function collectInputs() {
+    return {
+      title: $('#goalTitle').value,
+      amount: $('#goalAmount').value,
+      start: $('#startDate').value,
+      mode: $('#timelineMode').value,
+      target: $('#targetDate').value,
+      years: $('#yearsToAchieve').value,
+      currency: $('#currency').value,
+      income: $('#income').value,
+      current: $('#currentSave').value,
+      priority: $('#priority').value,
+      inflOn: $('#applyInflation').checked,
+      inflRate: $('#inflationRate').value,
+      icon: $('#goalIcon').textContent
+    };
+  }
+  function applyInputs(s) {
+    if (!s) return;
+    $('#goalTitle').value = s.title || '';
+    $('#goalAmount').value = s.amount || '';
+    $('#startDate').value = s.start || toISODateInput(new Date());
+    $('#timelineMode').value = s.mode || 'date';
+    switchTimelineMode();
+    $('#targetDate').value = s.target || '';
+    $('#yearsToAchieve').value = s.years || '';
+    $('#currency').value = s.currency || S.currency;
+    $('#income').value = s.income || '';
+    $('#currentSave').value = s.current || '';
+    $('#priority').value = s.priority || '2';
+    $('#applyInflation').checked = s.inflOn ?? true;
+    $('#inflationRate').value = s.inflRate || DEFAULTS.INFLATION_ANNUAL;
+    $('#goalIcon').textContent = s.icon || '🌟';
+    updatePriorityLabel();
+  }
+
+  // Saved Dreams CRUD
+  const SAVED_KEY = 'rc_saved_dreams';
+  function loadSaved() {
+    try {
+      const raw = localStorage.getItem(SAVED_KEY);
+      if (!raw) return [];
+      const arr = JSON.parse(raw);
+      return Array.isArray(arr) ? arr : [];
+    } catch { return []; }
+  }
+  function saveSaved(list) {
+    localStorage.setItem(SAVED_KEY, JSON.stringify(list));
+    renderSaved();
+  }
+  function addSaved(item) {
+    const list = loadSaved();
+    list.unshift(Object.assign({ id: 'd' + Date.now() }, item));
+    saveSaved(list);
+    toast(STR[S.lang].msgs.saved);
+  }
+  function deleteSaved(id) {
+    const list = loadSaved().filter(x => x.id !== id);
+    saveSaved(list);
+    toast(STR[S.lang].msgs.deleted);
+  }
+  function renderSaved() {
+    const list = loadSaved();
+    const wrap = $('#savedList');
+    wrap.innerHTML = '';
+    list.forEach(d => {
+      const div = document.createElement('div');
+      div.className = 'saved-item';
+      div.setAttribute('role','listitem');
+      const title = document.createElement('div');
+      title.textContent = `${d.icon || '🌟'} ${d.title} — ${d.currency} ${Number(d.amount).toFixed(2)}`;
+      const actions = document.createElement('div');
+      actions.className = 'saved-actions';
+      const open = document.createElement('button');
+      open.className = 'icon-btn';
+      open.textContent = 'Open';
+      open.onclick = () => { applyInputs(d); S.currency = d.currency; $('#currency').value = d.currency; calculateAndRender(); };
+      const del = document.createElement('button');
+      del.className = 'icon-btn';
+      del.textContent = 'Delete';
+      del.onclick = () => { deleteSaved(d.id); };
+      actions.appendChild(open); actions.appendChild(del);
+      div.appendChild(title); div.appendChild(actions);
+      wrap.appendChild(div);
+    });
+  }
+
+  // Timeline mode switch
+  function switchTimelineMode() {
+    const mode = $('#timelineMode').value;
+    $('#targetDateField').style.display = mode === 'date' ? '' : 'none';
+    $('#yearsField').style.display = mode === 'years' ? '' : 'none';
+  }
+
+  // Try example
+  function tryExample() {
+    // Use Goa Trip example and medium priority
+    const preset = PRESETS.find(p => p.id === 'goa');
+    const tile = $(`#presets .tile[data-id="${preset.id}"]`);
+    if (tile) tile.click();
+    $('#priority').value = '2';
+    updatePriorityLabel();
+    // 10 months plan
+    const start = new Date();
+    $('#startDate').value = toISODateInput(start);
+    $('#timelineMode').value = 'years';
+    switchTimelineMode();
+    $('#yearsToAchieve').value = '0.8'; // ~9.6 months
+    calculateAndRender();
+  }
+
+  // Initial test data (requirement #11)
+  function seedExamplesOnce() {
+    const seeded = localStorage.getItem('rc_seeded');
+    if (seeded) return;
+    const examples = [
+      { title: 'iPhone', amount: (fromCents(convertAmountCents(toCents(PRESETS[0].amountINR), 'INR', S.currency))).toFixed(2),
+        start: toISODateInput(new Date()), mode: 'years', years: '1.0', target: '', currency: S.currency,
+        income: '', current: '', priority: '2', inflOn: true, inflRate: DEFAULTS.INFLATION_ANNUAL, icon: '📱' },
+      { title: 'Goa Trip (7d)', amount: (fromCents(convertAmountCents(toCents(PRESETS[1].amountINR), 'INR', S.currency))).toFixed(2),
+        start: toISODateInput(new Date()), mode: 'years', years: '0.7', target: '', currency: S.currency,
+        income: '', current: '5000', priority: '2', inflOn: true, inflRate: DEFAULTS.INFLATION_ANNUAL, icon: '🏖️' },
+      { title: 'US Masters', amount: (fromCents(convertAmountCents(toCents(PRESETS[2].amountINR), 'INR', S.currency))).toFixed(2),
+        start: toISODateInput(new Date()), mode: 'years', years: '3', target: '', currency: S.currency,
+        income: '200000', current: '30000', priority: '3', inflOn: true, inflRate: DEFAULTS.INFLATION_ANNUAL, icon: '🎓' }
+    ];
+    const list = loadSaved();
+    examples.forEach(e => list.push(Object.assign({ id: 'd' + Date.now() + Math.random() }, e)));
+    saveSaved(list);
+    localStorage.setItem('rc_seeded', '1');
+  }
+
+  // Main calc+render helper
+  function calculateAndRender() {
+    const r = calculate();
+    if (r) renderResult(r);
+  }
+
+  // Event bindings
+  function bindEvents() {
+    $('#themeToggle').onclick = () => setTheme(S.theme === 'dark' ? 'light' : 'dark');
+    $('#langToggle').onclick = () => setLang(S.lang === 'en' ? 'hi' : 'en');
+    $('#timelineMode').onchange = switchTimelineMode;
+    $('#priority').oninput = updatePriorityLabel;
+    $('#tryExample').onclick = tryExample;
+    $('#calculate').onclick = calculateAndRender;
+    $('#reset').onclick = () => { localStorage.removeItem('rc_last_state'); window.location.reload(); };
+    $('#saveDream').onclick = () => { addSaved(Object.assign({ id:'', icon: $('#goalIcon').textContent }, collectInputs())); };
+    $('#downloadReport').onclick = exportPDF;
+    $('#exportImage').onclick = exportImage;
+    $('#shareBtn').onclick = share;
+    $('#copyShareText').onclick = copyShareText;
+
+    // inputs change -> autosave and live refresh
+    ['goalTitle','goalAmount','startDate','timelineMode','targetDate','yearsToAchieve','currency','income','currentSave','priority','applyInflation','inflationRate']
+      .forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('input', handleInputChange);
+        if (el) el.addEventListener('change', handleInputChange);
+      });
+
+    // About modal
+    const modal = $('#aboutModal');
+    $('#aboutBtn').onclick = () => { modal.style.display = 'flex'; modal.setAttribute('aria-hidden','false'); };
+    $('#aboutClose').onclick = () => { modal.style.display = 'none'; modal.setAttribute('aria-hidden','true'); };
+    modal.addEventListener('click', (e) => { if (e.target === modal) $('#aboutClose').click(); });
+
+    // Accessibility: ESC to close about
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && modal.style.display === 'flex') { $('#aboutClose').click(); }
+    });
+
+    // Chart responsive
+    window.addEventListener('resize', () => { if (S.lastCalc) updateChart(S.lastCalc); });
+  }
+
+  let inputTimer = null;
+  function handleInputChange(e) {
+    persistLastState();
+    if (e && e.target && e.target.id === 'currency') {
+      S.currency = $('#currency').value;
+      // Update presets amounts when currency changes
+      refreshPresetAmounts();
+    }
+    clearTimeout(inputTimer);
+    inputTimer = setTimeout(() => calculateAndRender(), 150);
+  }
+
+  // Init
+  async function init() {
+    setTheme(S.theme);
+    document.documentElement.lang = S.lang;
+    $('#startDate').value = toISODateInput(new Date());
+    $('#targetDate').value = toISODateInput(new Date(new Date().setMonth(new Date().getMonth()+12)));
+    $('#yearsToAchieve').value = '1.0';
+    $('#inflationRate').value = DEFAULTS.INFLATION_ANNUAL;
+    $('#currency').value = S.currency;
+
+    buildPresetsUI();
+
+    bindEvents();
+
+    // Load FX rates
+    S.rates = await fetchExchangeRates(S.currency);
+
+    // i18n
+    setLang(S.lang);
+
+    // Generate PNG icons once on load
+    ensurePngIcons();
+
+    // Seed examples and render saved list
+    seedExamplesOnce();
+    renderSaved();
+
+    // Restore last session or auto-run first example
+    const restored = restoreLastState();
+    if (!restored) {
+      tryExample();
+    } else {
+      calculateAndRender();
+    }
+  }
+
+  // Run
+  init();
+
+  </script>
+  <script>
+    // Helper scripts separated for clarity
+
+    // Announce if offline
+    window.addEventListener('offline', () => {
+      const S_lang = localStorage.getItem('rc_lang') || 'en';
+      const msg = (S_lang==='hi'?STR.hi.msgs.offline:STR.en.msgs.offline);
+      const t = document.getElementById('toast'); t.textContent = msg; t.style.display='block';
+      setTimeout(()=> t.style.display='none', 1800);
+    });
+
+    // Register service worker when served over HTTP(S)
+    if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(() => {});
+      });
+    }
+  </script>
+</body>
+</html>
